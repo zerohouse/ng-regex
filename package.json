@@ -1,6 +1,6 @@
 {
   "name": "ng-regex",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Regex expression to html elements",
   "main": "ng-regex.js",
   "scripts": {

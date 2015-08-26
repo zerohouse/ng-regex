@@ -1,43 +1,46 @@
-angular.module('ngRegex', []).directive('ngRegex', function ($compile) {
-    return {
-        restrict: 'A',
-        scope: {ngModel: '='},
-        link: function (scope, element, attrs) {
-            var message = angular.element("<div class='message' ng-show='!matched && ngModel!=undefined && ngModel.length != 0'>" + attrs.message + '</div>');
-            $compile(message)(scope);
+angular.module('ngRegex', [])
+    .directive('ngRegex', function ($compile) {
+        return {
+            restrict: 'A',
+            scope: {ngModel: '='},
+            link: function (scope, element, attrs) {
+                var message = angular.element("<span class='message' ng-show='!matched && ngModel!=undefined && ngModel.length != 0'>" + attrs.message + '</span>');
+                $compile(message)(scope);
 
-            element[0].parentNode.insertBefore(message[0], element[0].nextSibling);
-            var regex = new RegExp(attrs.ngRegex);
-            var parent = scope.$parent;
-            var regexTest = function () {
-                return regex.test(parent.$eval(attrs.ngModel));
-            };
-            parent.$watch(attrs.ngModel, function () {
-                if (parent.$eval(attrs.ngModel) == undefined || parent.$eval(attrs.ngModel) == "") {
-                    setRegex(false);
-                    return;
-                }
-                if (regexTest()) {
-                    setRegex(true);
-                    return;
-                }
-                setRegex(false);
+                element[0].parentNode.insertBefore(message[0], element[0].nextSibling);
+                var parent = scope.$parent;
+                var regex = parent[attrs.ngRegex];
 
-                function setRegex(val) {
-                    scope.matched = val;
-                    if (val)
-                        element.removeClass('waring');
-                    else
-                        element.addClass('waring');
+                if (regex == undefined)
+                    regex = new RegExp(attrs.ngRegex);
 
-                    if (!attrs.name)
+                var regexTest = function () {
+                    return regex.test(parent.$eval(attrs.ngModel));
+                };
+
+                parent.$watch(attrs.ngModel, function () {
+                    if (parent.$eval(attrs.ngModel) == undefined || parent.$eval(attrs.ngModel) == "") {
+                        setRegex(false, true);
                         return;
-                    if (parent.ngRegex == undefined)
-                        parent.ngRegex = {};
-                    parent.ngRegex[attrs.name] = val;
-                }
+                    }
+                    if (regexTest()) {
+                        setRegex(true);
+                        return;
+                    }
+                    setRegex(false);
 
-            });
+                    function setRegex(val, not) {
+                        scope.matched = val;
+                        if (!val && !not)
+                            element.addClass('waring');
+                        else
+                            element.removeClass('waring');
+
+                        if (parent.ngRegex == undefined)
+                            parent.ngRegex = {};
+                        parent.ngRegex[attrs.ngModel] = val;
+                    }
+                });
+            }
         }
-    }
-});
+    });
